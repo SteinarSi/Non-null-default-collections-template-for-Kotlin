@@ -57,33 +57,42 @@ The template in this repo is the same, but with a bit more logic on the last lin
 It is easier to read if we add some temporary whitespace (though it would also add whitespace to the generated code):  
 ```mustache
 @get:JsonProperty("{{{baseName}}}")
-    {{#isInherited}}
-        override
-    {{/isInherited}}
-    {{>modelMutable}} {{{name}}}:
-    {{#isEnum}}
-        {{#isArray}}{{baseType}}<{{/isArray}}
-        {{classname}}.{{{nameInPascalCase}}}
-        {{#isArray}}>{{/isArray}}
-    {{/isEnum}}
-    {{^isEnum}}{{{dataType}}}{{/isEnum}}
-    {{^isContainer}}
-        ?
+{{#isInherited}}
+    override
+{{/isInherited}}
+{{>modelMutable}} {{{name}}}:
+{{#isEnum}}
+    {{#isArray}}{{baseType}}<{{/isArray}}
+    {{classname}}.{{{nameInPascalCase}}}
+    {{#isArray}}>{{/isArray}}
+{{/isEnum}}
+{{^isEnum}}{{{dataType}}}{{/isEnum}}
+{{^isContainer}}
+    ?
+{{/isContainer}}
+=
+{{^defaultValue}}
+    {{#isContainer}}
+        {{#isArray}}
+            {{#modelMutable}}mutableListOf(){{/modelMutable}}
+            {{^modelMutable}}emptyList(){{/modelMutable}}
+        {{/isArray}}
+        {{#isSet}}
+            {{#modelMutable}}mutableSetOf(){{/modelMutable}}
+            {{^modelMutable}}emptySet(){{/modelMutable}}
+        {{/isSet}}
+        {{#isMap}}
+            {{#modelMutable}}mutableMapOf(){{/modelMutable}}
+            {{^modelMutable}}emptyMap(){{/modelMutable}}
+        {{/isMap}}
     {{/isContainer}}
-    =
-    {{^defaultValue}}
-        {{#isContainer}}
-            {{#isArray}}emptyList(){{/isArray}}
-            {{#isSet}}emptySet(){{/isSet}}
-            {{#isMap}}emptyMap(){{/isMap}}
-        {{/isContainer}}
-        {{^isContainer}}null{{/isContainer}}
-    {{/defaultValue}}
-    {{#defaultValue}}
-        {{^isNumber}}{{{defaultValue}}}{{/isNumber}}
-        {{#isNumber}}{{{dataType}}}("{{{defaultValue}}}"){{/isNumber}}
-    {{/defaultValue}}
+    {{^isContainer}}null{{/isContainer}}
+{{/defaultValue}}
+{{#defaultValue}}
+    {{^isNumber}}{{{defaultValue}}}{{/isNumber}}
+    {{#isNumber}}{{{dataType}}}("{{{defaultValue}}}"){{/isNumber}}
+{{/defaultValue}}
 ```
 The new additions are all by the `{{isContainer}}` tags:
 1. Nullable question marks are added only if the type is *not* a container.
-2. If the field does not already have a default value, and is a container, then the corresponding `emptyList()`, `emptySet()` or `emptyMap()` is added in place of `null`.
+2. If the field does not already have a default value, and is a container, then the corresponding empty collection is added in place of `null`.
