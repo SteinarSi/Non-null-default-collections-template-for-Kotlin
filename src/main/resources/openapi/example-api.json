@@ -1,0 +1,57 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "ExampleAPI",
+    "version": ""
+  },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "ExampleDataClass": {
+        "title": "ExampleDataClass",
+        "allOf": [
+          {
+            "type": "object",
+            "required": [
+              "requiredList",
+              "requiredMap"
+            ],
+            "properties": {
+              "requiredList": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "requiredMap": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "optionalList": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "optionalListWithDefault": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "default": ["hello", "world"]
+              },
+              "optionalMap": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
