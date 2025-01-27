@@ -27,4 +27,15 @@ class Tests {
     fun requiredListWorksAsUsual() {
         assertEquals(listOf("hello"), example.requiredList)
     }
+
+    private var mutable = no.kantega.generated.mutable.ExampleDataClass(
+        requiredList = mutableListOf("hello"),
+        requiredMap = mutableMapOf(),
+    )
+
+    @Test
+    fun canMutateList() {
+        mutable.optionalList.add("hello")
+        mutable.optionalMap["hello"] = "world"
+    }
 }

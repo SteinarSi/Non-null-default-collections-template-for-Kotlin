@@ -33,7 +33,7 @@ kotlin {
 	}
 }
 
-tasks.register<GenerateTask>("generateExampleApiSpec") {
+tasks.register<GenerateTask>("generateExampleApi") {
 	templateDir.set("$projectDir/src/main/resources/templates") // <==== This is important, don't forget
 
 	generatorName.set("kotlin-spring")
@@ -46,10 +46,25 @@ tasks.register<GenerateTask>("generateExampleApiSpec") {
 	sourceSets["main"].java.srcDir(file("$buildDir/generated/example-api/src/main"))
 }
 
+tasks.register<GenerateTask>("generateMutableExampleApi") {
+	templateDir.set("$projectDir/src/main/resources/templates") // <==== This is important, don't forget
+
+	generatorName.set("kotlin-spring")
+	inputSpec.set("$rootDir/src/main/resources/openapi/example-api.json")
+	outputDir.set("$buildDir/generated/mutable-example-api")
+	modelPackage.set("no.kantega.generated.mutable")
+	globalProperties.put("models", "")
+	configOptions.put("useSpringBoot3", "true")
+	configOptions.put("modelMutable", "true")
+
+	sourceSets["main"].java.srcDir(file("$buildDir/generated/mutable-example-api/src/main"))
+}
+
 tasks.withType<Test> {
 	useJUnitPlatform()
 }
 
 tasks.compileKotlin {
-	dependsOn(tasks.getByName("generateExampleApiSpec"))
+	dependsOn(tasks.getByName("generateExampleApi"))
+	dependsOn(tasks.getByName("generateMutableExampleApi"))
 }
