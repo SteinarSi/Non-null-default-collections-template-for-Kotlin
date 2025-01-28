@@ -1,9 +1,10 @@
 import no.kantega.generated.example.ExampleDataClass
+import no.kantega.generated.example.mutable.MutableExampleDataClass
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class Tests {
-    private var example = ExampleDataClass(
+    private val example = ExampleDataClass(
         requiredList = listOf("hello"),
         requiredMap = emptyMap(),
     )
@@ -28,13 +29,13 @@ class Tests {
         assertEquals(listOf("hello"), example.requiredList)
     }
 
-    private var mutable = no.kantega.generated.mutable.ExampleDataClass(
+    private var mutable = MutableExampleDataClass(
         requiredList = mutableListOf("hello"),
         requiredMap = mutableMapOf(),
     )
 
     @Test
-    fun canMutateList() {
+    fun canMutateDataClass() {
         mutable.optionalList.add("hello")
         mutable.optionalMap["hello"] = "world"
     }

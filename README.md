@@ -1,13 +1,15 @@
-# Non-null default collections template for generating Kotlin with OpenAPI
-## Description
+## Non-null default collections template for generating Kotlin with OpenAPI
+### Description
 This repository contains a [template](src/main/resources/templates/dataClassOptVar.mustache) that overrides part of the `kotlin-spring` generator from [OpenAPI Generator](https://github.com/OpenAPITools/openapi-generator). 
 
 The template contains two modifications around how optional collection fields in data classes are generated:
 * Their default values are `emptyList()`, `emptySet()`, or `emptyMap()` rather than `null`.
 * Their types are no longer nullable.
 
-## How to use
-First copy the [dataClassOptVar.mustache](src/main/resources/templates/dataClassOptVar.mustache) template and paste it somewhere within the `resources` folder in your project. The specific path can be modified, but the file itself must be called `dataClassOptVar.mustache`. Here is a suggested project structure:
+***
+
+### Usage
+First copy the [dataClassOptVar.mustache](src/main/resources/templates/dataClassOptVar.mustache) template and paste it somewhere within the `resources` folder in your project. The specific path is arbitrary, but the file itself must be called `dataClassOptVar.mustache`. Here is a suggested project structure:
 ```
 └── src
     ├── main
@@ -19,7 +21,7 @@ First copy the [dataClassOptVar.mustache](src/main/resources/templates/dataClass
 Now make sure that you refer to your templates folder when generating Kotlin code. That will look different depending on how you use the OpenAPI Generator.
 
 #### Generating with Gradle
-If you generate the code using gradle, then make sure to set the template directory to the same folder you added the template to in the previous step. See [build.gradle.kts](build.gradle.kts) for a complete example.
+If you generate the code using gradle, then you must set the template directory to the same folder you added the template to in the previous step. See Alternative 1 in [build.gradle.kts](build.gradle.kts) for a complete example.
 ```gradle
 import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
 
@@ -33,13 +35,32 @@ tasks.register<GenerateTask>("generateExampleApiSpec") {
 }
 ```
 
-[//]: # (#### Generating with the CLI)
-[//]: # (TODO)
+#### Generating with the command line interface
+If you are generating the code using the command line tool directly, then you have to set the template directory with the `-t` option. Make sure it points to the same directory as in the previous step.
+```
+openapi-generator-cli generate \
+  -t src/main/resources/templates \
+  -g kotlin-spring
+  # the rest of the generation options go here like usual #
+```
+Remember to also mark the generated directories as source directories, as that cannot be done with the CLI tool directly. Here is an example of how to do it in Gradle:
+```gradle
+sourceSets {
+    main {
+        java.srcDirs(
+            "build/generated/example-api/src/main",
+            "build/generated/mutable-example-api/src/main"
+        )
+    }
+```
+See [generate-api.sh](generate-api.sh) and Alternative 2 in [build.gradle.kts](build.gradle.kts) for a complete example.
 
 [//]: # (#### Generating with Maven)
 [//]: # (TODO)
 
-## How it works
+***
+
+### How it works
 The original `dataClassOptVar.mustache` template from the `kotlin-spring` generator looks like this:
 ```mustache
 {{#useBeanValidation}}{{>beanValidation}}{{>beanValidationModel}}{{/useBeanValidation}}{{#swagger2AnnotationLibrary}}
