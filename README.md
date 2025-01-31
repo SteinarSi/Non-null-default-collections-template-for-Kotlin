@@ -1,4 +1,13 @@
 ## Non-null default collections template for generating Kotlin with OpenAPI
+
+### Table of Contents
+* [Description](README.md#description)
+* [Usage](README.md#usage)
+  * [Generating with Gradle](README.md#generating-with-gradle)
+  * [Generating with the command line interface](README.md#generating-with-the-command-line-interface)
+* [How it works](README.md#how-it-works)
+***
+
 ### Description
 This repository contains a [template](src/main/resources/templates/dataClassOptVar.mustache) that overrides part of the `kotlin-spring` generator from [OpenAPI Generator](https://github.com/OpenAPITools/openapi-generator). 
 
@@ -22,7 +31,7 @@ Now make sure that you refer to your templates folder when generating Kotlin cod
 
 #### Generating with Gradle
 If you generate the code using gradle, then you must set the template directory to the same folder you added the template to in the previous step. See Alternative 1 in [build.gradle.kts](build.gradle.kts) for a complete example.
-```gradle
+```kts
 import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
 
 tasks.register<GenerateTask>("generateExampleApiSpec") {
@@ -37,14 +46,14 @@ tasks.register<GenerateTask>("generateExampleApiSpec") {
 
 #### Generating with the command line interface
 If you are generating the code using the command line tool directly, then you have to set the template directory with the `-t` option. Make sure it points to the same directory as in the previous step.
-```
+```sh
 openapi-generator-cli generate \
   -t src/main/resources/templates \
   -g kotlin-spring
   # the rest of the generation options go here like usual #
 ```
 Remember to also mark the generated directories as source directories, as that cannot be done with the CLI tool directly. Here is an example of how to do it in Gradle:
-```gradle
+```kts
 sourceSets {
     main {
         java.srcDirs(
@@ -52,6 +61,7 @@ sourceSets {
             "build/generated/mutable-example-api/src/main"
         )
     }
+}
 ```
 See [generate-api.sh](generate-api.sh) and Alternative 2 in [build.gradle.kts](build.gradle.kts) for a complete example.
 
@@ -61,7 +71,9 @@ See [generate-api.sh](generate-api.sh) and Alternative 2 in [build.gradle.kts](b
 ***
 
 ### How it works
-The original `dataClassOptVar.mustache` template from the `kotlin-spring` generator looks like this:
+OpenAPI Generator uses templates in the [Mustache template language](https://mustache.github.io/) to specify how to format json objects as native code. 
+
+The [original dataClassOptVar.mustache](https://github.com/OpenAPITools/openapi-generator/blob/master/modules/openapi-generator/src/main/resources/kotlin-spring/dataClassOptVar.mustache) template from the `kotlin-spring` generator looks like this:
 ```mustache
 {{#useBeanValidation}}{{>beanValidation}}{{>beanValidationModel}}{{/useBeanValidation}}{{#swagger2AnnotationLibrary}}
     @Schema({{#example}}example = "{{#lambdaRemoveLineBreak}}{{#lambdaEscapeInNormalString}}{{{.}}}{{/lambdaEscapeInNormalString}}{{/lambdaRemoveLineBreak}}", {{/example}}{{#isReadOnly}}readOnly = {{{isReadOnly}}}, {{/isReadOnly}}description = "{{{description}}}"){{/swagger2AnnotationLibrary}}{{#swagger1AnnotationLibrary}}
@@ -70,12 +82,13 @@ The original `dataClassOptVar.mustache` template from the `kotlin-spring` genera
     {{{.}}}{{/vendorExtensions.x-field-extra-annotation}}
     @get:JsonProperty("{{{baseName}}}"){{#isInherited}} override{{/isInherited}} {{>modelMutable}} {{{name}}}: {{#isEnum}}{{#isArray}}{{baseType}}<{{/isArray}}{{classname}}.{{{nameInPascalCase}}}{{#isArray}}>{{/isArray}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}? = {{^defaultValue}}null{{/defaultValue}}{{#defaultValue}}{{^isNumber}}{{{defaultValue}}}{{/isNumber}}{{#isNumber}}{{{dataType}}}("{{{defaultValue}}}"){{/isNumber}}{{/defaultValue}}
 ```
+You may interpret the entire file as a function that takes a non-required field on a JSON object and formats it into an optional field in a Kotlin data class.
 
-The template in this repo is the same, but with a bit more logic on the last line:
+The template in this repository is the same, but with a bit more logic on the last line:
 ```mustache
 @get:JsonProperty("{{{baseName}}}"){{#isInherited}} override{{/isInherited}} {{>modelMutable}} {{{name}}}: {{#isEnum}}{{#isArray}}{{baseType}}<{{/isArray}}{{classname}}.{{{nameInPascalCase}}}{{#isArray}}>{{/isArray}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^isContainer}}?{{/isContainer}} = {{^defaultValue}}{{#isContainer}}{{#isArray}}emptyList(){{/isArray}}{{#isSet}}emptySet(){{/isSet}}{{#isMap}}emptyMap(){{/isMap}}{{/isContainer}}{{^isContainer}}null{{/isContainer}}{{/defaultValue}}{{#defaultValue}}{{^isNumber}}{{{defaultValue}}}{{/isNumber}}{{#isNumber}}{{{dataType}}}("{{{defaultValue}}}"){{/isNumber}}{{/defaultValue}}
 ```
-It is easier to read if we add some temporary whitespace (though it would also add whitespace to the generated code):  
+It is easier to read it if we add some temporary whitespace (though it would also add whitespace to the generated code):  
 ```mustache
 @get:JsonProperty("{{{baseName}}}")
 {{#isInherited}}
